@@ -201,7 +201,7 @@ def get_bzhb_info(bzhb_name):
 
     questions = [
         gr.update(
-            label=f"{q['id']}-тапсырма — {q['score']} балл",
+           label=f"{q['id']}-тапсырма — {q['score']} балл | {q['text']}",
             placeholder=q["text"],
             visible=True,
             value=""
