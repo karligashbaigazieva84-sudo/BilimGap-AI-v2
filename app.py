@@ -200,13 +200,13 @@ def get_bzhb_info(bzhb_name):
         info += f"- **{code}** — {title}\n"
 
     questions = [
-        gr.update(
-           label=f"{q['id']}-тапсырма — {q['score']} балл | {q['text']}",
-            placeholder=q["text"],
-            visible=True,
-            value=""
-        )
-        for q in data["questions"]
+       gr.update(
+    label=f"{q['id']}-тапсырма — {q['score']} балл\n\n{q['text']}",
+    placeholder="Жауабыңызды осы жерге жазыңыз",
+    visible=True,
+    value=""
+)
+for q in data["questions"]
     ]
 
     return [info] + questions + [gr.update(value="", visible=False)]
