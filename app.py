@@ -1,739 +1,431 @@
 import os
 import re
-import html
 import gradio as gr
 
-
 # =========================================================
-# BilimGap AI
-# 5-сынып | БЖБ №1
+# BILIMGAP AI v2
+# 5-СЫНЫП: БЖБ №1 + БЖБ №2
 # =========================================================
 
-BZHB = {
-    "section": "Ақпарат және компьютер",
-    "max_score": 12,
-
-    "goals": {
-        "5.4.1.1": "Эргономика",
-        "5.2.1.1": "Ақпарат түрлері",
-        "5.3.3.1": "Интернетте ақпарат іздеу",
-        "5.1.1.1": "Есептеу техникасының даму тарихы",
-        "5.1.1.2": "Программалық жасақтама және ЖИ"
+BZHBS = {
+    "БЖБ №1": {
+        "section": "Ақпарат және компьютер",
+        "max_score": 12,
+        "goals": {
+            "5.4.1.1": "Эргономика",
+            "5.2.1.1": "Ақпарат түрлері",
+            "5.3.3.1": "Интернетте ақпарат іздеу",
+            "5.1.1.1": "Есептеу техникасының даму тарихы",
+            "5.1.1.2": "Программалық жасақтама және ЖИ",
+        },
+        "questions": [
+            {
+                "id": 1,
+                "goal": "5.4.1.1",
+                "text": "Компьютермен жұмыс істеу кезінде денсаулықты сақтаудың екі ережесін жазыңыз.",
+                "keywords": ["қашықтық", "жарық", "дұрыс отыру", "үзіліс", "экран"],
+                "score": 2,
+            },
+            {
+                "id": 2,
+                "goal": "5.2.1.1",
+                "text": "Мақала, фотосурет, ән және бейнеролик қандай ақпарат түрлеріне жатады? Компьютерде ақпарат қалай сақталады?",
+                "keywords": ["мәтін", "графикалық", "дыбыстық", "бейне", "екілік"],
+                "score": 2,
+            },
+            {
+                "id": 3,
+                "goal": "5.3.3.1",
+                "text": "Қазақстандағы есептеу техникасының даму тарихы туралы ақпарат іздеу үшін тиімді іздеу сұранысын жазыңыз.",
+                "keywords": ["қазақстан", "есептеу", "техника", "тарих"],
+                "score": 2,
+            },
+            {
+                "id": 4,
+                "goal": "5.1.1.1",
+                "text": "Есептеу техникасының даму кезеңдерін ретімен көрсетіп, болашақ компьютерлердің бір мүмкіндігін жазыңыз.",
+                "keywords": ["b-d-c-a", "жасанды интеллект", "жи"],
+                "score": 2,
+            },
+            {
+                "id": 5,
+                "goal": "5.1.1.2",
+                "text": "Windows, Microsoft Word және Python IDLE программаларын программалық жасақтама түрлеріне жіктеңіз.",
+                "keywords": ["windows", "жүйелік", "word", "қолданбалы", "python", "инструменталды"],
+                "score": 2,
+            },
+            {
+                "id": 6,
+                "goal": "5.1.1.2",
+                "text": "Жасанды интеллект қолданылатын бір программаны атаңыз және оның не істейтінін түсіндіріңіз.",
+                "keywords": ["chatgpt", "жасанды интеллект", "жи", "жауап", "ақпарат"],
+                "score": 2,
+            },
+        ],
     },
 
-    "questions": [
-        {
-            "id": 1,
-            "goal": "5.4.1.1",
-            "text": (
-                "Айдос экранға өте жақын отырды және бөлмедегі жарық "
-                "жеткіліксіз болды. Екі қатені анықтап, дұрыс әрекетті жазыңыз."
-            ),
-            "keywords": [
-                "қашықтық",
-                "алыс",
-                "жарық",
-                "жарықтандыру"
-            ],
-            "min_keywords": 2,
-            "score": 2
+    "БЖБ №2": {
+        "section": "Цифрлық кескіндер",
+        "max_score": 12,
+        "goals": {
+            "5.2.2.1": "Растрлық және векторлық графика, RGB/CMYK",
+            "5.2.2.3": "Растрлық кескіндерді құру",
+            "5.2.2.2": "Растрлық кескіндерді өңдеу",
+            "5.3.3.2": "Кіріс деректердің цифрлық жүйе нәтижесіне әсері",
         },
+        "questions": [
+            {
+                "id": 1,
+                "goal": "5.2.2.1",
+                "text": "Фотосурет үшін қай графика тиімді?",
+                "answer": "растрлық",
+                "score": 1,
+            },
+            {
+                "id": 2,
+                "goal": "5.2.2.1",
+                "text": "Экрандағы кескін үшін қай түстік модель қолданылады?",
+                "answer": "rgb",
+                "score": 1,
+            },
+            {
+                "id": 3,
+                "goal": "5.2.2.3",
+                "text": "Растрлық редакторда кескін құруға қолданылатын екі нысанды атаңыз.",
+                "keywords": ["тіктөртбұрыш", "шеңбер", "эллипс", "сызық", "көпбұрыш", "мәтін"],
+                "score": 2,
+            },
+            {
+                "id": 4,
+                "goal": "5.2.2.2",
+                "text": "Растрлық кескінді өңдеудің екі әрекетін атаңыз.",
+                "keywords": ["ерекшелеу", "жылжыту", "кадрлау", "қабат"],
+                "score": 2,
+            },
+            {
+                "id": 5,
+                "goal": "5.3.3.2",
+                "text": "ЖИ-ға нақты әрі толық кіріс дерегін беру неге маңызды?",
+                "keywords": ["нақты", "толық", "нәтиже", "сапа", "дұрыс"],
+                "score": 3,
+            },
+            {
+                "id": 6,
+                "goal": "5.3.3.2",
+                "text": "«Табиғат суретін жаса» сұранысын нақтылап жазыңыз.",
+                "keywords": ["тау", "орман", "көл", "күн", "аспан", "табиғат"],
+                "score": 3,
+            },
+        ],
+    },
+}
 
-        {
-            "id": 2,
-            "goal": "5.2.1.1",
-            "text": (
-                "Мақала, фотосурет, ән, бейнероликтің ақпарат түрлерін "
-                "және компьютерде ақпарат қандай кодпен сақталатынын жазыңыз."
-            ),
-            "keywords": [
-                "мәтіндік",
-                "графикалық",
-                "дыбыстық",
-                "бейне",
-                "екілік"
-            ],
-            "min_keywords": 4,
-            "score": 2
-        },
+CORRECTIONS = {
+    "5.4.1.1": "Компьютермен қауіпсіз жұмыс істеудің 3 ережесін жазыңыз.",
+    "5.2.1.1": "Мәтіндік, графикалық, дыбыстық және бейне ақпаратқа бір-бірден мысал келтіріңіз.",
+    "5.3.3.1": "Интернеттен нақты ақпарат табуға арналған 2 тиімді іздеу сұранысын құрыңыз.",
+    "5.1.1.1": "Есептеу техникасының даму кезеңдерін ретімен жазыңыз.",
+    "5.1.1.2": "Жүйелік, қолданбалы программалар мен ЖИ құралдарына мысал келтіріңіз.",
 
-        {
-            "id": 3,
-            "goal": "5.3.3.1",
-            "text": (
-                "«Қазақстандағы есептеу техникасының даму тарихы» туралы "
-                "тиімді іздеу сұранысын жазыңыз және таңдауыңызды түсіндіріңіз."
-            ),
-            "keywords": [
-                "қазақстан",
-                "есептеу",
-                "техника",
-                "тарих",
-                "нақты"
-            ],
-            "min_keywords": 2,
-            "score": 2
-        },
-
-        {
-            "id": 4,
-            "goal": "5.1.1.1",
-            "text": (
-                "Реттеңіз: A — заманауи дербес компьютерлер, "
-                "B — қарапайым есептеу құралдары, "
-                "C — электрондық есептеу машиналары, "
-                "D — механикалық есептеу құрылғылары. "
-                "Болашақ компьютердің бір мүмкіндігін атаңыз."
-            ),
-            "keywords": [
-                "b-d-c-a",
-                "b d c a",
-                "жасанды интеллект",
-                "жылдам",
-                "ақылды"
-            ],
-            "min_keywords": 1,
-            "score": 2
-        },
-
-        {
-            "id": 5,
-            "goal": "5.1.1.2",
-            "text": (
-                "Windows, Microsoft Word және Python IDLE программаларын "
-                "түрлері бойынша жіктеңіз."
-            ),
-            "keywords": [
-                "жүйелік",
-                "қолданбалы",
-                "инструменталды"
-            ],
-            "min_keywords": 3,
-            "score": 2
-        },
-
-        {
-            "id": 6,
-            "goal": "5.1.1.2",
-            "text": (
-                "Жасанды интеллект қолданылатын бір программаны атаңыз "
-                "және ЖИ қандай қызмет атқаратынын түсіндіріңіз."
-            ),
-            "keywords": [
-                "жасанды интеллект",
-                "жи",
-                "тану",
-                "ұсыну",
-                "жауап",
-                "болжау"
-            ],
-            "min_keywords": 2,
-            "score": 2
-        }
-    ]
+    "5.2.2.1": "Растрлық және векторлық графиканың 2 айырмашылығын жазыңыз.",
+    "5.2.2.2": "Растрлық кескінді өңдеудің 3 әрекетін атаңыз.",
+    "5.2.2.3": "Растрлық редакторда сурет құруға қолданылатын 3 құралды атаңыз.",
+    "5.3.3.2": "ЖИ-ға «Мектеп туралы сурет жаса» сұранысын нақты әрі толық етіп қайта жазыңыз.",
 }
 
 
-CORRECTION_TASKS = {
-    "5.4.1.1": {
-        "task": "Компьютермен жұмыс істеудің 3 қауіпсіздік ережесін жазыңыз.",
-        "tip": "Дұрыс отыру, экран қашықтығы және жарықты еске түсіріңіз."
-    },
-
-    "5.2.1.1": {
-        "task": (
-            "Подкаст, электрондық кітап, сурет және бейнесабақтың "
-            "ақпарат түрін анықтаңыз."
-        ),
-        "tip": (
-            "Мәтіндік, графикалық, дыбыстық және бейне "
-            "түрлерін қайталаңыз."
-        )
-    },
-
-    "5.3.3.1": {
-        "task": (
-            "«Қазақстандағы алғашқы компьютерлер» тақырыбына "
-            "тиімді іздеу сұранысын құрыңыз."
-        ),
-        "tip": "Нақты кілт сөздерді таңдаңыз."
-    },
-
-    "5.1.1.1": {
-        "task": (
-            "Есепшот, механикалық машина, электрондық компьютер, "
-            "заманауи компьютерді даму ретімен орналастырыңыз."
-        ),
-        "tip": "Есептеу техникасының даму кезеңдерін қайталаңыз."
-    },
-
-    "5.1.1.2": {
-        "task": (
-            "Жүйелік, қолданбалы және инструменталды программаларға "
-            "бір-бір мысал келтіріп, ЖИ қолданылатын бір программаны атаңыз."
-        ),
-        "tip": "Программалық жасақтама түрлерін қайталаңыз."
-    }
-}
+def normalize(text):
+    text = str(text or "").lower().strip()
+    text = text.replace("ё", "е")
+    text = re.sub(r"\s+", " ", text)
+    return text
 
 
-# =========================================================
-# Мәтінді қалыпқа келтіру
-# =========================================================
+def score_question(question, answer):
+    answer = normalize(answer)
 
-def normalize_text(value):
-    value = str(value or "").lower().strip()
-
-    value = (
-        value
-        .replace("–", "-")
-        .replace("—", "-")
-        .replace("_", " ")
-    )
-
-    value = re.sub(r"\s+", " ", value)
-
-    return value
-
-
-# =========================================================
-# Бір тапсырманы автоматты тексеру
-# =========================================================
-
-def check_question(question, answer):
-    text = normalize_text(answer)
-
-    if not text:
+    if not answer:
         return 0
 
-    keywords = question.get("keywords", [])
+    max_score = question["score"]
 
-    found = 0
+    if "answer" in question:
+        correct = normalize(question["answer"])
 
-    for keyword in keywords:
-        if normalize_text(keyword) in text:
-            found += 1
+        if correct in answer:
+            return max_score
 
-    minimum = question.get("min_keywords", 1)
+        return 0
 
-    if found >= minimum:
-        return question["score"]
+    keywords = [normalize(x) for x in question.get("keywords", [])]
+    found = sum(1 for keyword in keywords if keyword in answer)
 
-    return 0
+    if found == 0:
+        return 0
+
+    # 1 балдық сұрақ
+    if max_score == 1:
+        return 1
+
+    # 2 балдық сұрақ: кемінде екі негізгі белгі
+    if max_score == 2:
+        return 2 if found >= 2 else 1
+
+    # 3 балдық сұрақ
+    if max_score == 3:
+        if found >= 3:
+            return 3
+        elif found == 2:
+            return 2
+        else:
+            return 1
+
+    return min(found, max_score)
 
 
-# =========================================================
-# Мәртебе
-# =========================================================
+def get_bzhb_info(bzhb_name):
+    data = BZHBS[bzhb_name]
 
-def status_from_percent(percent):
-    if percent >= 80:
-        return "green", "🟢", "Меңгерілген"
+    info = f"""
+## 📘 5-сынып — {bzhb_name}
 
-    if percent >= 50:
-        return "yellow", "🟡", "Бекіту қажет"
+### {data['section']}
 
-    return "red", "🔴", "Олқылық анықталды"
+**Максималды балл:** {data['max_score']}
 
+### 🎯 Оқу мақсаттары
+"""
 
-# =========================================================
-# Білім картасының карточкасы
-# =========================================================
+    for code, title in data["goals"].items():
+        info += f"- **{code}** — {title}\n"
 
-def status_card(goal, goal_name, percent):
-    color, icon, status = status_from_percent(percent)
-
-    styles = {
-        "green": (
-            "#eafaf1",
-            "#22c55e",
-            "#087a3e"
-        ),
-
-        "yellow": (
-            "#fffbea",
-            "#f4b400",
-            "#9a6700"
-        ),
-
-        "red": (
-            "#fff0f0",
-            "#ef4444",
-            "#b91c1c"
+    questions = [
+        gr.update(
+            label=f"{q['id']}-тапсырма — {q['score']} балл",
+            placeholder=q["text"],
+            visible=True,
+            value=""
         )
-    }
-
-    bg, border, text_color = styles[color]
-
-    return f"""
-    <div style="
-        background:{bg};
-        border-left:10px solid {border};
-        padding:16px;
-        margin:12px 0;
-        border-radius:12px;
-    ">
-
-        <div style="font-size:28px;">
-            {icon}
-        </div>
-
-        <b>
-            {html.escape(goal)}
-            —
-            {html.escape(goal_name)}
-        </b>
-
-        <br>
-
-        <span style="
-            font-size:21px;
-            color:{text_color};
-            font-weight:700;
-        ">
-            {percent}% — {status}
-        </span>
-
-    </div>
-    """
-
-
-# =========================================================
-# Негізгі тексеру
-# =========================================================
-
-def check_bzhb(
-    student_name,
-    answer1,
-    answer2,
-    answer3,
-    answer4,
-    answer5,
-    answer6
-):
-
-    if not str(student_name).strip():
-        return """
-        <div style="
-            background:#fff3cd;
-            padding:16px;
-            border-radius:12px;
-        ">
-            ⚠️ Оқушының аты-жөнін енгізіңіз.
-        </div>
-        """
-
-    answers = [
-        answer1,
-        answer2,
-        answer3,
-        answer4,
-        answer5,
-        answer6
+        for q in data["questions"]
     ]
 
-    total_score = 0
+    return [info] + questions + [gr.update(value="", visible=False)]
 
+
+def check_bzhb(name, bzhb_name, *answers):
+    data = BZHBS[bzhb_name]
+
+    total = 0
     goal_scores = {}
+    goal_max = {}
 
-    for goal in BZHB["goals"]:
-        goal_scores[goal] = {
-            "score": 0,
-            "max": 0
-        }
-
-    # Әр тапсырманы тексеру
-    for question, answer in zip(
-        BZHB["questions"],
-        answers
-    ):
-
-        score = check_question(
-            question,
-            answer
-        )
-
-        total_score += score
+    for question, answer in zip(data["questions"], answers):
+        earned = score_question(question, answer)
+        total += earned
 
         goal = question["goal"]
+        goal_scores[goal] = goal_scores.get(goal, 0) + earned
+        goal_max[goal] = goal_max.get(goal, 0) + question["score"]
 
-        goal_scores[goal]["score"] += score
-        goal_scores[goal]["max"] += question["score"]
+    percentage = round(total / data["max_score"] * 100)
 
-    # Жалпы пайыз
-    total_percent = round(
-        total_score /
-        BZHB["max_score"] *
-        100
-    )
+    if percentage >= 80:
+        overall = "🟢 Меңгерілген"
+    elif percentage >= 50:
+        overall = "🟡 Бекіту қажет"
+    else:
+        overall = "🔴 Олқылық анықталды"
 
-    overall_color, overall_icon, overall_status = (
-        status_from_percent(total_percent)
-    )
+    student = name.strip() if name and name.strip() else "Оқушы"
 
-    result_html = f"""
-    <div style="
-        padding:20px;
-        border-radius:16px;
-        background:#f8fafc;
-        margin-bottom:20px;
-    ">
+    result = f"""
+# 🧠 Цифрлық білім картасы
 
-        <h2>📊 БЖБ НӘТИЖЕСІ</h2>
+**Оқушы:** {student}  
+**Сынып:** 5-сынып  
+**БЖБ:** {bzhb_name} — {data['section']}
 
-        <b>Оқушы:</b>
-        {html.escape(str(student_name))}
-        <br>
+## 📊 Жалпы нәтиже
 
-        <b>Сынып:</b> 5
-        <br>
+### {total}/{data['max_score']} балл — {percentage}%
 
-        <b>БЖБ:</b>
-        №1 — Ақпарат және компьютер
-        <br><br>
+### {overall}
 
-        <span style="font-size:25px;">
-            <b>
-                {total_score} / 12 балл
-                — {total_percent}%
-            </b>
-        </span>
+---
 
-        <br><br>
+## 🎯 Оқу мақсаттары бойынша нәтиже
+"""
 
-        <span style="font-size:22px;">
-            {overall_icon}
-            <b>{overall_status}</b>
-        </span>
+    weak_goals = []
 
-    </div>
+    for goal, title in data["goals"].items():
+        earned = goal_scores.get(goal, 0)
+        maximum = goal_max.get(goal, 0)
 
-    <h2>
-        🧠 ЦИФРЛЫҚ БІЛІМ КАРТАСЫ
-    </h2>
-    """
-
-    correction_html = ""
-
-    # Әр оқу мақсаты жеке есептеледі
-    for goal, goal_name in BZHB["goals"].items():
-
-        earned = goal_scores[goal]["score"]
-        maximum = goal_scores[goal]["max"]
-
-        if maximum > 0:
-            percent = round(
-                earned /
-                maximum *
-                100
-            )
+        if maximum == 0:
+            goal_percent = 0
         else:
-            percent = 0
+            goal_percent = round(earned / maximum * 100)
 
-        result_html += status_card(
-            goal,
-            goal_name,
-            percent
+        if goal_percent >= 80:
+            status = "🟢 Меңгерілген"
+        elif goal_percent >= 50:
+            status = "🟡 Бекіту қажет"
+            weak_goals.append(goal)
+        else:
+            status = "🔴 Олқылық анықталды"
+            weak_goals.append(goal)
+
+        result += (
+            f"\n### {status}\n"
+            f"**{goal} — {title}**  \n"
+            f"{earned}/{maximum} балл — {goal_percent}%\n"
         )
 
-        # Тек жасыл емес мақсаттарға түзету тапсырмасы
-        if percent < 80:
+    result += "\n---\n"
 
-            correction = CORRECTION_TASKS.get(goal)
+    if weak_goals:
+        result += "\n## 🎯 Жеке түзету тапсырмалары\n"
 
-            if correction:
+        for number, goal in enumerate(weak_goals, 1):
+            title = data["goals"].get(goal, "")
+            task = CORRECTIONS.get(
+                goal,
+                "Осы оқу мақсаты бойынша қосымша жаттығу орындаңыз."
+            )
 
-                _, icon, status = (
-                    status_from_percent(percent)
-                )
+            result += f"""
+### {number}. {goal} — {title}
 
-                correction_html += f"""
-                <div style="
-                    background:#f8fafc;
-                    border:1px solid #e5e7eb;
-                    padding:16px;
-                    margin:12px 0;
-                    border-radius:12px;
-                ">
+**✏️ Түзету тапсырмасы:**  
+{task}
 
-                    <b>
-                        {icon}
-                        {html.escape(goal)}
-                        —
-                        {status}
-                    </b>
-
-                    <br><br>
-
-                    <b>✍️ Түзету тапсырмасы:</b>
-                    <br>
-
-                    {html.escape(correction["task"])}
-
-                    <br><br>
-
-                    <b>💡 Кеңес:</b>
-                    <br>
-
-                    {html.escape(correction["tip"])}
-
-                </div>
-                """
-
-    if correction_html:
-
-        result_html += """
-        <br>
-        <h2>
-            🎯 ЖЕКЕ ТҮЗЕТУ ТАПСЫРМАЛАРЫ
-        </h2>
-        """
-
-        result_html += correction_html
-
+"""
     else:
+        result += """
+## 🌟 Қосымша түзету жұмысы қажет емес
 
-        result_html += """
-        <div style="
-            background:#eafaf1;
-            border-left:10px solid #22c55e;
-            padding:16px;
-            margin-top:20px;
-            border-radius:12px;
-        ">
-            🎉 Барлық оқу мақсаттары меңгерілген.
-        </div>
-        """
+Барлық бағаланған оқу мақсаттары жеткілікті деңгейде меңгерілген.
+"""
 
-    return result_html
+    return gr.update(value=result, visible=True)
 
-
-# =========================================================
-# Интерфейс
-# =========================================================
 
 CSS = """
 .gradio-container {
-    max-width: 1100px !important;
+    max-width: 1050px !important;
     margin: auto !important;
 }
-
-.title {
-    text-align:center;
-    margin-bottom:25px;
-}
-
-.orange-btn {
-    background:#ff7417 !important;
-    color:white !important;
-    font-weight:bold !important;
-    border-radius:12px !important;
-}
-
-.question-box {
-    border:1px solid #e5e7eb;
-    border-radius:14px;
-    padding:10px;
-    margin-bottom:10px;
+#title {
+    text-align: center;
+    padding: 18px;
 }
 """
 
 
-with gr.Blocks(
-    title="BilimGap AI",
-    css=CSS
-) as app:
+with gr.Blocks(css=CSS, title="BilimGap AI") as app:
 
-    gr.HTML("""
-    <div class="title">
+    gr.Markdown(
+        """
+# 🧠 BilimGap AI
+### БЖБ нәтижесі арқылы білім олқылығын автоматты анықтау
 
-        <h1>
-            🧠 BilimGap AI
-        </h1>
-
-        <h2>
-            Білім олқылықтарын анықтау
-            және түзету жүйесі
-        </h2>
-
-        <p>
-            5–9 сынып |
-            Информатика және жасанды интеллект
-        </p>
-
-    </div>
-    """)
+**5–9 сынып информатика пәніне арналған интеллектуалды білім картасы**
+""",
+        elem_id="title"
+    )
 
     with gr.Tab("👨‍🎓 ОҚУШЫ"):
 
-        gr.Markdown(
-            """
-            ## 📝 БЖБ орындау
+        gr.Markdown("## 📝 БЖБ орындау")
 
-            **Сынып:** 5
-
-            **БЖБ №1:** Ақпарат және компьютер
-
-            **Максималды балл:** 12
-            """
-        )
-
-        student_name = gr.Textbox(
-            label="👤 Оқушының аты-жөні",
+        name = gr.Textbox(
+            label="Оқушының аты-жөні",
             placeholder="Мысалы: Арнұр"
         )
 
-        gr.Markdown(
-            "### 1-тапсырма — Эргономика"
+        grade = gr.Dropdown(
+            choices=["5-сынып"],
+            value="5-сынып",
+            label="Сынып"
         )
 
-        gr.Markdown(
-            BZHB["questions"][0]["text"]
+        bzhb = gr.Dropdown(
+            choices=["БЖБ №1", "БЖБ №2"],
+            value="БЖБ №1",
+            label="БЖБ таңдаңыз"
         )
 
-        answer1 = gr.Textbox(
-            label="Жауап",
-            lines=3
-        )
+        info = gr.Markdown()
 
-        gr.Markdown(
-            "### 2-тапсырма — Ақпарат түрлері"
-        )
+        answer_boxes = []
 
-        gr.Markdown(
-            BZHB["questions"][1]["text"]
-        )
-
-        answer2 = gr.Textbox(
-            label="Жауап",
-            lines=3
-        )
-
-        gr.Markdown(
-            "### 3-тапсырма — Интернетте ақпарат іздеу"
-        )
-
-        gr.Markdown(
-            BZHB["questions"][2]["text"]
-        )
-
-        answer3 = gr.Textbox(
-            label="Жауап",
-            lines=3
-        )
-
-        gr.Markdown(
-            "### 4-тапсырма — Есептеу техникасының даму тарихы"
-        )
-
-        gr.Markdown(
-            BZHB["questions"][3]["text"]
-        )
-
-        answer4 = gr.Textbox(
-            label="Жауап",
-            lines=3
-        )
-
-        gr.Markdown(
-            "### 5-тапсырма — Программалық жасақтама"
-        )
-
-        gr.Markdown(
-            BZHB["questions"][4]["text"]
-        )
-
-        answer5 = gr.Textbox(
-            label="Жауап",
-            lines=3
-        )
-
-        gr.Markdown(
-            "### 6-тапсырма — Жасанды интеллект"
-        )
-
-        gr.Markdown(
-            BZHB["questions"][5]["text"]
-        )
-
-        answer6 = gr.Textbox(
-            label="Жауап",
-            lines=3
-        )
+        for i in range(6):
+            box = gr.Textbox(
+                label=f"{i+1}-тапсырма",
+                lines=3
+            )
+            answer_boxes.append(box)
 
         check_button = gr.Button(
             "🧠 БЖБ-ны тексеру",
-            elem_classes="orange-btn"
+            variant="primary"
         )
 
-        result = gr.HTML()
+        result = gr.Markdown(visible=False)
+
+        bzhb.change(
+            fn=get_bzhb_info,
+            inputs=bzhb,
+            outputs=[info] + answer_boxes + [result]
+        )
+
+        app.load(
+            fn=get_bzhb_info,
+            inputs=bzhb,
+            outputs=[info] + answer_boxes + [result]
+        )
 
         check_button.click(
             fn=check_bzhb,
-            inputs=[
-                student_name,
-                answer1,
-                answer2,
-                answer3,
-                answer4,
-                answer5,
-                answer6
-            ],
+            inputs=[name, bzhb] + answer_boxes,
             outputs=result
         )
 
-    with gr.Tab("👩‍🏫 МҰҒАЛІМ"):
-
+    with gr.Tab("🗺️ ЦИФРЛЫҚ БІЛІМ КАРТАСЫ"):
         gr.Markdown(
             """
-            # 👩‍🏫 Мұғалімнің талдау панелі
+## 🗺️ Цифрлық білім картасы
 
-            Бұл бөлім келесі кезеңде
-            барлық оқушылардың нәтижелерін
-            жинақтап көрсетеді.
+Оқушы БЖБ тапсырмаларын орындағаннан кейін жүйе:
 
-            ### Бағалау шектері
-
-            🟢 **80–100% — Меңгерілген**
-
-            🟡 **50–79% — Бекіту қажет**
-
-            🔴 **0–49% — Олқылық анықталды**
-            """
+- жалпы балл мен пайызды есептейді;
+- әр оқу мақсатын жеке талдайды;
+- 🟢 **Меңгерілген**
+- 🟡 **Бекіту қажет**
+- 🔴 **Олқылық анықталды**
+- қажет оқу мақсаттарына жеке түзету тапсырмасын ұсынады.
+"""
         )
 
-    with gr.Tab("ℹ️ ЖОБА ТУРАЛЫ"):
-
+    with gr.Tab("👩‍🏫 МҰҒАЛІМ КАБИНЕТІ"):
         gr.Markdown(
             """
-            # 💡 BilimGap AI
+## 👩‍🏫 Мұғалім кабинеті
 
-            **Мақсаты:** БЖБ нәтижелерін автоматты
-            тексеру, оқу мақсаттары бойынша білім
-            олқылықтарын анықтау және оқушыға
-            жеке түзету тапсырмаларын ұсыну.
+Келесі кезеңде бұл бөлімге:
 
-            Жүйе 5–9 сынып информатика пәніне
-            арналған.
-            """
+**сынып нәтижелері → оқу мақсаты бойынша олқылықтар → түзету топтары → Excel есебі**
+
+қосылады.
+"""
         )
 
-
-# =========================================================
-# Render іске қосу
-# =========================================================
 
 if __name__ == "__main__":
-
-    port = int(
-        os.environ.get(
-            "PORT",
-            7860
-        )
-    )
+    port = int(os.environ.get("PORT", 7860))
 
     app.launch(
         server_name="0.0.0.0",
         server_port=port
     )
-# BilimGap AI v2 жаңартылды
