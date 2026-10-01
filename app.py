@@ -315,17 +315,31 @@ def get_bzhb_info(bzhb_name):
     for code, title in data["goals"].items():
         info += f"- **{code}** — {title}\n"
 
-    questions = [
-       gr.update(
-    label=f"{q['id']}-тапсырма — {q['score']} балл\n\n{q['text']}",
-    placeholder="Жауабыңызды осы жерге жазыңыз",
-    visible=True,
-    value=""
-)
-for q in data["questions"]
-    ]
+    questions = []
 
-    return [info] + questions + [gr.update(value="", visible=False)]
+    # Нақты БЖБ сұрақтарын шығару
+    for q in data["questions"]:
+        questions.append(
+            gr.update(
+                label=f"{q['id']}-тапсырма — {q['score']} балл\n\n{q['text']}",
+                placeholder="Жауабыңызды осы жерге жазыңыз",
+                visible=True,
+                value=""
+            )
+        )
+
+    # Егер сұрақ 6-дан аз болса, қалған ұяшықтарды жасыру
+    while len(questions) < 6:
+        questions.append(
+            gr.update(
+                label="",
+                placeholder="",
+                visible=False,
+                value=""
+            )
+        )
+
+    return [info] + questions[:6] + [gr.update(value="", visible=False)]
 
 
 def check_bzhb(name, bzhb_name, *answers):
