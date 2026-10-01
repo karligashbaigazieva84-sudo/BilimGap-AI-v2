@@ -300,7 +300,7 @@ def score_question(question, answer):
 
 
 def get_bzhb_info(bzhb_name):
-    data = BZHBS[bzhb_name]
+    data = BZHBs[bzhb_name]
 
     info = f"""
 ## 📘 5-сынып — {bzhb_name}
