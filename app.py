@@ -481,7 +481,7 @@ with gr.Blocks(css=CSS, title="BilimGap AI") as app:
         )
 
         bzhb = gr.Dropdown(
-            choices=["БЖБ №1", "БЖБ №2"],
+            choices=["БЖБ №1", "БЖБ №2", "БЖБ №3", "БЖБ №4"],
             value="БЖБ №1",
             label="БЖБ таңдаңыз"
         )
