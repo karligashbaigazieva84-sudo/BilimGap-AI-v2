@@ -491,10 +491,13 @@ with gr.Blocks(css=CSS, title="BilimGap AI") as app:
         answer_boxes = []
 
         for i in range(6):
-            box = gr.Textbox(
-                label=f"{i+1}-тапсырма",
-                lines=3
-            )
+            
+              box = gr.Textbox(
+    label="",
+    lines=3,
+    visible=False
+)
+            
             answer_boxes.append(box)
 
         check_button = gr.Button(
